@@ -118,5 +118,30 @@ namespace Xamarin.Forms.Firebase.src
             }
         }
 
+        /// <summary>
+        /// delete objects on database
+        /// </summary>
+        /// <param name="obj">object to be deleted</param>
+        /// <returns></returns>
+        public async Task<bool> DeleteObject(T obj)
+        {
+            //check object
+            var key = await ObjectExist(obj);
+
+            try
+            {
+                //Delete instance
+                await GlobalInstance.DatabaseClient.Child(TableName).Child(key).DeleteAsync();
+
+                //return result
+                return await Task.FromResult(true);
+            }
+            catch (Exception)
+            {
+                //return false
+                return await Task.FromResult(false);
+            }
+        }
+
     }
 }
