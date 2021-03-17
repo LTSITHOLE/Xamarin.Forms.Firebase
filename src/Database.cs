@@ -55,6 +55,33 @@ namespace Xamarin.Forms.Firebase.src
             }
         }
 
+        /// <summary>
+        /// checks the objects in the database
+        /// </summary>
+        /// <param name="obj">object to be checked</param>
+        /// <returns></returns>
+        public async Task<bool> InstanceExist(T obj)
+        {
+            try
+            {
+                //get collection from database
+                var list = await GlobalInstance.DatabaseClient.Child(TableName).OnceAsync<T>();
+                
+                //search for the object
+                var res = list.Where(u => u.Object.Equals(obj)).FirstOrDefault();
+
+                //return result
+                if (res.Object == null)
+                    return await Task.FromResult(false);
+                else
+                    return await Task.FromResult(true);
+            }
+            catch (Exception)
+            {
+                //return false
+                return await Task.FromResult(false);
+            }
+        }
 
     }
 }
