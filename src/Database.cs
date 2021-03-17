@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Firebase.Database.Query;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,7 +61,7 @@ namespace Xamarin.Forms.Firebase.src
         /// </summary>
         /// <param name="obj">object to be checked</param>
         /// <returns></returns>
-        public async Task<bool> InstanceExist(T obj)
+        public async Task<string> ObjectExist(T obj)
         {
             try
             {
@@ -72,9 +73,43 @@ namespace Xamarin.Forms.Firebase.src
 
                 //return result
                 if (res.Object == null)
-                    return await Task.FromResult(false);
+                    return await Task.FromResult(res.Key);
                 else
-                    return await Task.FromResult(true);
+                    return await Task.FromResult(res.Key);
+            }
+            catch (Exception)
+            {
+                //return false
+                return await Task.FromResult(string.Empty);
+            }
+        }
+
+        /// <summary>
+        /// create object on the databse
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public async Task<bool> CreateOrUpdateObject(T obj)
+        {
+            //check object
+            var key = await ObjectExist(obj);
+
+            try
+            {
+                //create or update instance
+                if(string.IsNullOrEmpty(key))
+                {
+                    //create instance
+                    await GlobalInstance.DatabaseClient.Child(TableName).PostAsync(obj);
+                }
+                else
+                {
+                    //update instance
+                    await GlobalInstance.DatabaseClient.Child(TableName).Child(key).PutAsync(obj);
+                }
+
+                //return result
+               return await Task.FromResult(true);
             }
             catch (Exception)
             {
